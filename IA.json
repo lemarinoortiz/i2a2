@@ -1,0 +1,363 @@
+{
+  "name": "IA",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7d1b4797-3448-4bcf-8d0f-58fa2479af31",
+      "name": "When chat message received",
+      "webhookId": "cfe490c1-7aa8-491c-9f1f-f51e29ed4381"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "753bcdd0-e72e-429e-976e-472dddc74979",
+              "name": "idConserva",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "0406f574-af9b-438f-bf12-5627a42cc131",
+              "name": "Mensagem",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "569b2d9b-5ce9-449c-8dcd-85eb67b55d3b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "geral",
+          "mode": "list",
+          "cachedResultName": "geral"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversas",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "idconversa": "={{ $json.idConserva }}",
+            "mensagem": "={{ $json.Mensagem }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "idconversa",
+              "displayName": "idconversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mensagem",
+              "displayName": "mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        400,
+        0
+      ],
+      "id": "c8c53401-cbc6-4f80-a0b1-d434128df33e",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "ENf1fAcwKJfjkR9N",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.mensagem }}",
+        "options": {
+          "systemMessage": "👋 Olá! Que bom te ver por aqui! Para começarmos, por favor envie seu arquivo CSV com as notas fiscais no seguinte link: http://10.147.18.132:5679/webhook/enviar-csv 📁. Assim poderei analisar os dados e te ajudar com insights financeiros!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        680,
+        0
+      ],
+      "id": "e926033b-66e1-44b7-9dfb-d0c92e5dd700",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-2024-05-13",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-2024-05-13"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        540,
+        180
+      ],
+      "id": "7adad716-97ee-4ccc-9688-f8aa16b07abc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "qGkxgCSlUDbTMr2v",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Postgres').item.json.idconversa }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        760,
+        180
+      ],
+      "id": "b7c3358a-d962-4faf-8dae-24c16dba0c05",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "stage",
+          "mode": "list",
+          "cachedResultName": "stage"
+        },
+        "table": {
+          "__rl": true,
+          "value": "nf_itens",
+          "mode": "list",
+          "cachedResultName": "nf_itens"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1020,
+        220
+      ],
+      "id": "3c3e25dc-0dc8-443b-b968-c63db47ebc9b",
+      "name": "Postgres1",
+      "credentials": {
+        "postgres": {
+          "id": "7LM5s0RpnXtp3MJN",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "stage",
+          "mode": "list",
+          "cachedResultName": "stage"
+        },
+        "table": {
+          "__rl": true,
+          "value": "nf_cabecalho",
+          "mode": "list",
+          "cachedResultName": "nf_cabecalho"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1100,
+        140
+      ],
+      "id": "e270ded7-be32-4d4f-a527-dd499613a275",
+      "name": "Postgres2",
+      "credentials": {
+        "postgres": {
+          "id": "7LM5s0RpnXtp3MJN",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "stage",
+          "mode": "list",
+          "cachedResultName": "stage"
+        },
+        "table": {
+          "__rl": true,
+          "value": "logs",
+          "mode": "list",
+          "cachedResultName": "logs"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1200,
+        60
+      ],
+      "id": "6d95faf1-41f4-474b-859b-3f3a940b7646",
+      "name": "Postgres3",
+      "credentials": {
+        "postgres": {
+          "id": "7LM5s0RpnXtp3MJN",
+          "name": "Postgres account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres3": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "68136035-8209-457b-8fde-90b81df0e2e9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1ddc274a83b46dc3ee1c8dd620b44fba4d21b9531ba345eb5b648b36a4c134e"
+  },
+  "id": "RUuHKC5mNWudzGUG",
+  "tags": []
+}
